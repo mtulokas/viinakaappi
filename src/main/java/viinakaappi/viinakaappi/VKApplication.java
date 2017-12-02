@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import spark.ModelAndView;
 import spark.Spark;
+import static spark.Spark.port;
 import spark.template.thymeleaf.ThymeleafTemplateEngine;
 import viinakaappi.viinakaappi.database.Database;
 import viinakaappi.viinakaappi.dao.RaakaaineDao;
@@ -22,6 +23,11 @@ import viinakaappi.viinakaappi.dao.DrinkkiRaakaaineDao;
 public class VKApplication {
 
     public static void main(String[] args) throws Exception {
+        // Heroku
+        if (System.getenv("PORT") != null) {
+            port(Integer.valueOf(System.getenv("PORT")));
+        }
+
         Database database = new Database("jdbc:sqlite:db/kanta.db");
         RaakaaineDao raakaaineet = new RaakaaineDao(database);
         DrinkkiDao drinkit = new DrinkkiDao(database);
