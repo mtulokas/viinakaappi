@@ -20,8 +20,7 @@ public class DrinkkiRaakaaineDao {
 
     public List<Raakaaine> findAllByDrinkkiId(int drinkki_id) throws SQLException {
         List<Raakaaine> ra = new ArrayList<>();
-        //String query = "SELECT id, nimi FROM Raakaaine WHERE id IN (SELECT raakaaine_id FROM DrinkkiRaakaaine WHERE drinkki_id = ?)";
-        String query = "SELECT Raakaaine.id, Raakaaine.nimi, maara FROM DrinkkiRaakaaine LEFT JOIN Raakaaine ON raakaaine_id = id WHERE drinkki_id = ? ORDER BY jarjestys";
+        String query = "SELECT Raakaaine.id, Raakaaine.nimi, maara FROM DrinkkiRaakaaine LEFT JOIN Raakaaine ON raakaaine_id = id WHERE drinkki_id = ? ORDER BY jarjestys DESC";
 
         try (Connection conn = database.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -36,12 +35,17 @@ public class DrinkkiRaakaaineDao {
     }
 
     public Raakaaine createFromRow(ResultSet resultSet) throws SQLException {
-        return new Raakaaine(resultSet.getInt("ID"), resultSet.getString("nimi"), resultSet.getString("maara"));
+        return new Raakaaine(resultSet.getInt("ID"), resultSet.getString("nimi"), 0, resultSet.getString("maara"));
     }
 
     public Raakaaine insertRow(int drinkki_id, int raakaaine_id, String maara) throws SQLException {
+        if (maara.equals("")){
+            System.out.println("Määrä on tyhjä");
+            return null;
+        }
+        
         String testQuery = "SELECT drinkki_id, raakaaine_id FROM DrinkkiRaakaaine WHERE drinkki_id = ? AND raakaaine_id = ?";
-        String insertQuery = "INSERT INTO DrinkkiRaakaaine (drinkki_id, raakaaine_id, maara) VALUES (?,?,?)";
+        String insertQuery = "INSERT INTO DrinkkiRaakaaine (drinkki_id, raakaaine_id, maara, jarjestys) VALUES (?,?,?,?)";
 
         try (Connection conn = database.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(testQuery);
@@ -57,6 +61,7 @@ public class DrinkkiRaakaaineDao {
             stmt.setInt(1, drinkki_id);
             stmt.setInt(2, raakaaine_id);
             stmt.setString(3, maara);
+            stmt.setInt(4, 0);
             stmt.executeUpdate();
         }
 
@@ -79,9 +84,7 @@ public class DrinkkiRaakaaineDao {
                     nykyinenJarjestys = result.getInt("jarjestys");
                 }
             }
-            System.out.println("Nykyinen on " + nykyinenJarjestys);
-            nykyinenJarjestys--;
-            System.out.println("uusi on " + nykyinenJarjestys);
+            nykyinenJarjestys++;
             stmt = conn.prepareStatement(updateQuery);
             stmt.setInt(1, nykyinenJarjestys);
             stmt.setInt(2, drinkki_id);

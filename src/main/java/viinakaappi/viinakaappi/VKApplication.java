@@ -35,28 +35,46 @@ public class VKApplication {
 
         Spark.get("/", (req, res) -> {
             HashMap map = new HashMap<>();
+            map.put("drinkit", drinkit.findDrinksWithAllIngredients());
             return new ModelAndView(map, "index");
         }, new ThymeleafTemplateEngine());
 
         Spark.get("/raakaaine", (req, res) -> {
             HashMap map = new HashMap<>();
-            map.put("raakaaineet", raakaaineet.findAll());
+            ArrayList<Raakaaine> raakaaineList = new ArrayList();
+            raakaaineList = (ArrayList<Raakaaine>) raakaaineet.findAll();
+            Collections.sort(raakaaineList);
+            map.put("raakaaineet", raakaaineList);
             return new ModelAndView(map, "raakaaine");
         }, new ThymeleafTemplateEngine());
 
         Spark.post("/raakaaine", (req, res) -> {
             HashMap map = new HashMap<>();
-            Raakaaine ra = new Raakaaine(0, req.queryParams("nimi"));
+            Raakaaine ra = new Raakaaine(0, req.queryParams("nimi"), 0);
             raakaaineet.saveOrUpdate(ra);
             res.redirect("/raakaaine");
             return "";
         });
 
-        Spark.get("/raakaaine/:id", (req, res) -> {
+        Spark.post("/raakaaine/:id", (req, res) -> {
             Integer id = Integer.parseInt(req.params(":id"));
-            raakaaineet.delete(id);
-            res.redirect("/raakaaine");
             System.out.println(id);
+            System.out.println(req.queryParams("param"));
+            Raakaaine ra = raakaaineet.findOne(id);
+            System.out.println(ra.getNimi());
+            if (req.queryParams("param").equals("delete")) {
+                raakaaineet.delete(id);
+            } else if (req.queryParams("param").equals("addsaldo")) {
+                System.out.println("Lisätään saldo");
+                ra.setSaldo(1);
+                raakaaineet.saveOrUpdate(ra);
+            } else if (req.queryParams("param").equals("removesaldo")) {
+                System.out.println("Poistetaan saldo");
+                ra.setSaldo(0);
+                raakaaineet.saveOrUpdate(ra);
+            }
+            res.redirect("/raakaaine");
+            
             return "";
         });
 
@@ -75,10 +93,21 @@ public class VKApplication {
         });
         Spark.post("/drinkit/:id", (req, res) -> {
             Integer id = Integer.parseInt(req.params(":id"));
-            System.out.println("Poistetaan: " + id);
-            drinkkiRaakaaineet.delete(id);
-            drinkit.delete(id);
-            res.redirect("/drinkit");
+            if (req.queryParams("param").equals("delete")) {
+                System.out.println("Poistetaan: " + id);
+                drinkkiRaakaaineet.delete(id);
+                drinkit.delete(id);
+                res.redirect("/drinkit");
+            } else if (req.queryParams("param").equals("ohje")) {
+                System.out.println("Lisätään ohje");
+                Drinkki dr = drinkit.findOne(id);
+                dr.setOhje(req.queryParams("ohje"));
+                System.out.println(dr.getNimi());
+                System.out.println(dr.getOhje());
+                drinkit.saveOrUpdate(dr);
+                res.redirect("/drinkki/" + id);
+            }
+
             return "";
         });
 
@@ -109,6 +138,8 @@ public class VKApplication {
             Integer raakaineId = Integer.parseInt(req.params(":raakaaineId"));
             String param = req.queryParams("param");
             System.out.println(param);
+            System.out.println(drinkkiId);
+            System.out.println(raakaineId);
             if (param.equals("moveUp")) {
                 drinkkiRaakaaineet.moveUp(drinkkiId, raakaineId);
             } else if (param.equals("delete")) {

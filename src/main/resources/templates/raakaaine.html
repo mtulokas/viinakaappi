@@ -7,17 +7,38 @@
     </head>
 
     <body bgcolor="skyblue">
+        <h1>Raaka-aineet</h1>
         <table width="600">
             <thead align = left>
                 <tr>
-                    <th>Raakaaine</th>
+                    <th>Nimi</th>
+                    <th>Saatavuus</th>
                 </tr>
+                
             </thead>
             <tbody>
                 <tr th:each="ra : ${raakaaineet}">
-                    <td th:text="${ra.nimi}">Message</td>
+                    <td th:text="${ra.nimi}">Nimi</td>
+                    <td th:text="${ra.saldotext}">Saldo</td>
                     <td>
-                        <a th:href="@{~/raakaaine/{id}(id=${ra.id})}">poista</a>
+                        <div th:if="${ra.ifsaldo}">
+                            <form th:action="@{~/raakaaine/{id}(id=${ra.id})}" method="post">
+                                <input type="hidden" name="param" value="removesaldo">
+                                    <input type="submit" value="Poista kaapista"/>
+                            </form>
+                        </div>
+                        <div th:unless="${ra.ifsaldo}">
+                            <form th:action="@{~/raakaaine/{id}(id=${ra.id})}" method="post">
+                                <input type="hidden" name="param" value="addsaldo">
+                                    <input type="submit" value="Lisaa kaappiin"/>
+                            </form>
+                        </div>
+                    </td>
+                    <td>
+                        <form th:action="@{~/raakaaine/{id}(id=${ra.id})}" method="post">
+                            <input type="hidden" name="param" value="delete">
+                                <input type="submit" value="Poista raakaaine"/>
+                        </form>
                     </td>
                 </tr>
             </tbody>
@@ -25,7 +46,7 @@
         <br>
             <form method="POST" action="/raakaaine">
                 <input type="text" name="nimi"/><br/>
-                <input type="submit" value="Lisää"/>
+                <input type="submit" value="Lisaa uusi raakaaine"/>
             </form>
             <a href="/">Etusivulle</a>
     </body>

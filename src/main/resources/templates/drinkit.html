@@ -2,15 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 
     <head>
-        <title>Drinkit</title>
+        <title>Drinkkireseptit</title>
         <meta charset="utf-8" />
     </head>
 
     <body bgcolor="skyblue">
+        <h1>Drinkkireseptit</h1>
         <table width="600">
             <thead align = left>
                 <tr>
-                    <th>Drinkit</th>
+                    <th>Drinkki</th>
                 </tr>
             </thead>
             <tbody>
@@ -20,7 +21,8 @@
                     </td>
                     <td>
                         <form th:action="@{~/drinkit/{id}(id=${dr.id})}" method="POST">
-                            <input type="submit" value="Poista"/>
+                            <input type="hidden" name="param" value="delete">
+                                <input type="submit" value="Poista"/>
                         </form>
                     </td>
                 </tr>
@@ -29,8 +31,9 @@
         <br>
             <form method="POST" action="/drinkit">
                 <input type="text" name="nimi"/><br/>
-                <input type="submit" value="Lisää"/>
+                <input type="submit" value="Lisaa uusi drinkkiresepti"/>
             </form>
-            <a href="/">Etusivulle</a>
+        </br>
+        <a href="/">Etusivulle</a>
     </body>
 </html>

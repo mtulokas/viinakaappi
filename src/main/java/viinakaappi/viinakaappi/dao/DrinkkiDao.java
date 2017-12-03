@@ -20,7 +20,7 @@ public class DrinkkiDao implements Dao<Drinkki, Integer> {
 
     @Override
     public Drinkki findOne(Integer key) throws SQLException {
-        String query = "SELECT ID, Nimi FROM Drinkki WHERE ID = ?";
+        String query = "SELECT ID, Nimi, ohje FROM Drinkki WHERE ID = ?";
 
         try (Connection conn = database.getConnection()) {
             PreparedStatement stmt = conn.prepareStatement(query);
@@ -40,7 +40,25 @@ public class DrinkkiDao implements Dao<Drinkki, Integer> {
 
         try (Connection conn = database.getConnection();
                 ResultSet result = conn.prepareStatement(
-                        "SELECT ID, nimi FROM Drinkki"
+                        "SELECT ID, nimi, ohje FROM Drinkki"
+                ).executeQuery()) {
+
+            while (result.next()) {
+                headers.add(createFromRow(result));
+            }
+        }
+
+        return headers;
+    }
+    
+        public List<Drinkki> findDrinksWithAllIngredients() throws SQLException {
+        List<Drinkki> headers = new ArrayList<>();
+
+        try (Connection conn = database.getConnection();
+                ResultSet result = conn.prepareStatement(
+                        "SELECT ID, nimi, ohje FROM Drinkki WHERE id NOT IN (SELECT drinkki_id FROM DrinkkiRaakaaine\n" +
+                        "LEFT JOIN Raakaaine ON Raakaaine.id = DrinkkiRaakaaine.raakaaine_id\n" +
+                        "WHERE saldo = 0)"
                 ).executeQuery()) {
 
             while (result.next()) {
@@ -52,13 +70,26 @@ public class DrinkkiDao implements Dao<Drinkki, Integer> {
     }
 
     public Drinkki createFromRow(ResultSet resultSet) throws SQLException {
-        return new Drinkki(resultSet.getInt("ID"), resultSet.getString("nimi"));
+        return new Drinkki(resultSet.getInt("ID"), resultSet.getString("nimi"), resultSet.getString("ohje"));
     }
 
     @Override
     public Drinkki saveOrUpdate(Drinkki object) throws SQLException {
-        Drinkki ra = findByName(object.getNimi());
-        if (ra != null) {
+        if (object.getNimi().equals("")){
+            System.out.println("Tyhjä");
+            return null;
+        }
+        
+        Drinkki dr = findByName(object.getNimi());
+        if (dr != null) {
+            if (object.getOhje() != null && !object.getOhje().isEmpty()) {
+                try (Connection conn = database.getConnection()) {
+                    PreparedStatement stmt = conn.prepareStatement("UPDATE Drinkki SET ohje = ? WHERE ID = ?");
+                    stmt.setString(1, object.getOhje());
+                    stmt.setInt(2, object.getId());
+                    stmt.executeUpdate();
+                }
+            } 
             return null;
         }
         try (Connection conn = database.getConnection()) {
@@ -82,7 +113,7 @@ public class DrinkkiDao implements Dao<Drinkki, Integer> {
 
     private Drinkki findByName(String nimi) throws SQLException {
         try (Connection conn = database.getConnection()) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT id, nimi FROM Drinkki WHERE nimi = ?");
+            PreparedStatement stmt = conn.prepareStatement("SELECT id, nimi, ohje FROM Drinkki WHERE nimi = ?");
             stmt.setString(1, nimi);
 
             try (ResultSet result = stmt.executeQuery()) {

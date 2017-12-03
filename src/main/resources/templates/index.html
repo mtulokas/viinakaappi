@@ -8,8 +8,17 @@
 
     <body bgcolor="skyblue">
         <h1>Viinakaappi</h1>
-	<a href="/raakaaine">Raakaaineet</a>		
-        <a href="/drinkit">Drinkit</a>		
+        <a href="/raakaaine">Raakaaineet</a>		
+        </br>
+        <a href="/drinkit">Drinkkireseptit</a>	
+        </br>
+        <p><b>Drinkit joihin kaikki raaka-aineet saatavilla:</b></p>
+        <ul>
+            <li th:each="dr : ${drinkit}">
+                <a th:href="@{~/drinkki/{id}(id=${dr.id})}"><span th:text="${dr.nimi}">nimi</span></a>
+                <br>
+            </li>
+        </ul>
 
     </body>
 </html>

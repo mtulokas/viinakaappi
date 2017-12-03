@@ -8,6 +8,7 @@
 
     <body bgcolor="skyblue">
         <h1 th:text="${drinkki.nimi}">Name of the drink</h1>
+        <p th:text="${drinkki.ohje}">ohje</p>
         <table width="600">
             <thead align = left>
                 <tr>
@@ -22,33 +23,43 @@
                     <td>
                         <form th:action="@{~/drinkki/{id}/{raId}(id=${drinkki.id},raId=${ra.id})}" method="post">
                             <input type="hidden" name="param" value="moveUp">
-                            <input type="submit" value="Nosta ylos"/>
+                                <input type="submit" value="Nosta ylos"/>
                         </form>
                     </td>
                     <td>
                         <form th:action="@{~/drinkki/{id}/{raId}(id=${drinkki.id},raId=${ra.id})}" method="post">
                             <input type="hidden" name="param" value="delete">
-                            <input type="submit" value="Poista"/>
+                                <input type="submit" value="Poista"/>
                         </form>
                     </td>
                 </tr>
             </tbody>
         </table>
 
-        <br>
-            <br>
-                <form th:action="@{~/drinkki/{id}(id=${drinkki.id})}" method="post">
-                    Valitse raaka-aine:<br/>
-                    <select name="raakaaineId">
-                        <option th:each="ra: ${raakaaineet}" th:value="${ra.id}" th:text="${ra.nimi}">
-                            xx
-                        </option>
-                    </select><br/>
-                    Maara:<br/>
-                    <input type="text" name="maara"/><br/>
-                    <input type="submit" value="Lisaa"/>
-                </form>
+        </br>
+        </br>
+        <form th:action="@{~/drinkki/{id}(id=${drinkki.id})}" method="post">
+            Valitse raaka-aine:<br/>
+            <select name="raakaaineId">
+                <option th:each="ra: ${raakaaineet}" th:value="${ra.id}" th:text="${ra.nimi}">
+                    xx
+                </option>
+            </select><br/>
+            Maara:<br/>
+            <input type="text" name="maara"/><br/>
+            <input type="submit" value="Lisaa"/>
+        </form>
+        </br>
 
-                <a href="/drinkit">Drinkit</a>
-                </body>
-                </html>
+        <form th:action="@{~/drinkit/{id}(id=${drinkki.id})}" method="post">
+            <input type="hidden" name="param" value="ohje">
+                <input type="text" name="ohje"/>
+                <br/>
+                <input type="submit" value="Lisaa tai paivita ohje"/>
+        </form>
+        </br>   
+        <a href="/drinkit">Drinkit</a>
+        </br>   
+        <a href="/">Etusivulle</a>
+    </body>
+</html>
